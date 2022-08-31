@@ -3,6 +3,7 @@ import my
 import requests
 import json
 
+
 class ApiSeller():
 	"""получение данных по API"""
 	def __init__(self):
