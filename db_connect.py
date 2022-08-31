@@ -26,13 +26,23 @@ def execute_query(connection, query):
 	except Error as e:
 		print(f"The error '{e}' occurred.")
 
+def executemany_query(connection, query, values):
+	"""запись в БД"""
+	cursor = connection.cursor()
+	try:
+		cursor.executemany(query, values)
+		connection.commit()
+		print("Query executed successfully.")
+	except Error as e:
+		print(f"The error '{e}' occurred.")
 
-def execute_read_query(connection, query):
+
+def execute_read_query(connection, query, values):
 	"""извлечение из БД"""
 	cursor = connection.cursor()
 	result = None
 	try:
-		cursor.execute(query)
+		cursor.execute(query, values)
 		result = cursor.fetchall()
 		return result
 	except Error as e:
