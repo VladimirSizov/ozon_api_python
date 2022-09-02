@@ -1,6 +1,7 @@
 # порядок выполнения
 import upload_data as upload
 
+
 # загрузка в БД
 
 # в таблицу 'product_list'

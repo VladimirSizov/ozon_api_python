@@ -1,27 +1,26 @@
 # создание таблиц в БД
 
-from db_connect import *
+import db_connect as db
 
 
 # product_list
-create_table_product_list = """
+db.execute("""
 CREATE TABLE IF NOT EXISTS product_list (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	product_id INTEGER,
 	offer_id TEXT
 );
-"""
-execute_query(connection, create_table_product_list)
+""")
 
 
 # product_info
-create_table_product_info = """
+db.execute("""
 CREATE TABLE IF NOT EXISTS product_info (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	product_id INTEGER,
 	offer_id TEXT,
-	visible INTEGER,
-	images INTEGER
+	visible INTEGER DEFAULT FALSE,
+	images TEXT DEFAULT 0,
+	name TEXT,
+	min_price REAL DEFAULT 0
 );
-"""
-execute_query(connection, create_table_product_info)
+""")
