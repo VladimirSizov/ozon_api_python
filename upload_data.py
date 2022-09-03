@@ -9,14 +9,21 @@ def upd_product_list():
 	# в таблицу 'product_list'
 	data = api.ApiSeller().post_product_list()['result']['items']
 	for product in data:
-		result = db.exec_fetch("SELECT product_id, offer_id FROM product_list WHERE product_id = :product_id AND offer_id = :offer_id", product)
+		result = db.exec_fetch("SELECT product_id, offer_id FROM product_list WHERE product_id = :product_id", {'product_id': product['product_id']})
 		if not result:
 			# если нет пары 'product_id' и 'offer_id', создаем новую запись
 			db.executemany("INSERT INTO product_list (product_id, offer_id) VALUES (:product_id, :offer_id);", [product])
 			print('New data created: product_id: ' + str(product['product_id']) + ', offer_id: ' + str(product['offer_id']))
-		else:
+		elif product['offer_id'] == result[0][1]:
+			# если пара 'product_id' и 'offer_id' есть, ничего не делаем
 			print('Data is exist. product_id: ' + str(product['product_id']) + ', offer_id: ' + str(product['offer_id']))
+		else:
+			# обновляем 'offer_id'
+			db.executemany("UPDATE product_list SET product_id = :product_id, offer_id = :offer_id WHERE product_id = :product_id", product)
+			print('Data updated: product_id: ' + str(product['product_id']) + ', offer_id: ' + str(product['offer_id']))
+
 	print("ALL DATA HAS BEEN WRITE IN 'product_list'\n")
+
 
 
 def upd_product_info():
@@ -61,7 +68,7 @@ def upd_product_info():
 				:name,
 				:min_price
 				);""", values_write)
-				#print('New data created: product_id: ' + str(product_id) + ', offer_id: ' + str(offer_id))
+				print('New data created: product_id: ' + str(product_id) + ', offer_id: ' + str(offer_id))
 			else:
 				# в 'product_info' запись есть, обновляем данные
 				db.executemany("""UPDATE product_info
@@ -70,18 +77,18 @@ def upd_product_info():
 				visible = :visible,
 				min_price = :min_price
 				WHERE product_id = :product_id AND offer_id = :offer_id""", values_write)
-				#print('Existing data updated. product_id: ' + str(product_id) + ', offer_id: ' + str(offer_id))
-
+				print('Existing data updated. product_id: ' + str(product_id) + ', offer_id: ' + str(offer_id))
+				# удаления из таблицы 'product_info' не предусмотрено!
 			# проверяем есть ли в 'images' записи по полученному по API 'offer_id'
 			#print('images')
 			#print(images)
-			old_images = db.exec_fetch("SELECT offer_id, image FROM images WHERE offer_id = :offer_id", [offer_id])
+			old_images = db.exec_fetch("SELECT product_id, image FROM images WHERE product_id = :product_id", [product_id])
 			if not old_images:
 				# в 'images' записей с таким значением нет, делаем новую запись
 				if new_images:
 					for image in new_images:
-						img_values = [{'offer_id': offer_id, 'image': image}]
-						db.executemany("""INSERT INTO images (offer_id, image) VALUES (:offer_id, :image);""", img_values)
+						img_values = [{'product_id': product_id, 'image': image}]
+						db.executemany("""INSERT INTO images (product_id, image) VALUES (:product_id, :image);""", img_values)
 						print('new image add: '+ image)
 			else:
 				arr_old_images = []
@@ -93,19 +100,19 @@ def upd_product_info():
 					else:
 						# удалить текущую старую запись из таблицы
 						db.executemany("""DELETE FROM images WHERE image = :image""", [{'image': old_img[1]}])
-						print('delete image: ' + old_img[1])
+						print('delete old image: ' + old_img[1])
 				for new_img in new_images:
 					if new_img in arr_old_images:
+						print('image is exist: ' + new_img)
 						continue
 					else:
 						# записать новое изображение
-						img_values = [{'offer_id': offer_id, 'image': new_img}]
-						db.executemany("""INSERT INTO images (offer_id, image) VALUES (:offer_id, :image);""", img_values)
+						img_values = [{'product_id': product_id, 'image': new_img}]
+						db.executemany("""INSERT INTO images (product_id, image) VALUES (:product_id, :image);""", img_values)
 						print('new image add: ' + new_img)
-
 		# если в 'product_info'записей по 'product_id' по запросу API не получили (удалены, не существует)
 		except:
 			print("Can't execute this PRODUCT is not exist. product_id: " + str(product[0]))
 
-
-	print("ALL DATA HAS BEEN WRITE IN 'product_info'\n")
+	print("ALL DATA HAS BEEN WRITE IN 'product_info'")
+	print("ALL DATA HAS BEEN WRITE IN 'images'\n")

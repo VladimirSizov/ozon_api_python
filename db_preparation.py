@@ -3,10 +3,11 @@
 import db_connect as db
 
 
+#db.execute("""PRAGMA foreign_keys=on""")
+
 # product_list
 db.execute("""
 CREATE TABLE IF NOT EXISTS product_list (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	product_id INTEGER,
 	offer_id TEXT
 );
@@ -16,8 +17,7 @@ CREATE TABLE IF NOT EXISTS product_list (
 # product_info
 db.execute("""
 CREATE TABLE IF NOT EXISTS product_info (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	product_id INTEGER,
+	product_id INTEGER PRIMARY KEY,
 	offer_id TEXT,
 	visible INTEGER DEFAULT FALSE,
 	name TEXT,
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS product_info (
 # images
 db.execute("""
 CREATE TABLE IF NOT EXISTS images (
-	offer_id TEXT,
+	product_id INTEGER,
 	image TEXT,
-	FOREIGN KEY (offer_id) REFERENCES product_info (offer_id) ON DELETE CASCADE
+	FOREIGN KEY (product_id) REFERENCES product_info (product_id) ON DELETE CASCADE
 );
 """)
